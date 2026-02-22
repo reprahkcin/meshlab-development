@@ -26,6 +26,9 @@ def test_align_icp_returns_dict(sphere_mesh_path):
     assert result["target_mesh_id"] == target_id
     assert "iterations_performed" in result
     assert "final_rms_error" in result
+    # PyMeshLab does not expose these values; they are None
+    assert result["iterations_performed"] is None
+    assert result["final_rms_error"] is None
 
 
 def test_align_icp_does_not_modify_target(sphere_mesh_path):

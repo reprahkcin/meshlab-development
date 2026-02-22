@@ -46,15 +46,18 @@ def align_icp(
     -------
     dict
         ``{"source_mesh_id": int, "target_mesh_id": int,
-           "iterations_performed": int, "final_rms_error": float}``
+           "iterations_performed": None, "final_rms_error": None}``
+
+        .. note::
+            PyMeshLab's ``compute_matrix_by_icp_between_meshes`` applies the
+            transform in-place and returns ``None``, so iteration count and
+            final RMS error are not available from the library.
     """
     ms = session.mesh_set
 
-    # ICP requires both meshes in the set; set the source as current
-    ms.set_current_mesh(source_mesh_id)
-
     # compute_matrix_by_icp_between_meshes applies the transform to the
-    # source mesh in-place and returns None.
+    # source mesh in-place and returns None; iteration count / RMS are not
+    # exposed by PyMeshLab.
     ms.compute_matrix_by_icp_between_meshes(
         referencemesh=target_mesh_id,
         sourcemesh=source_mesh_id,
@@ -66,8 +69,9 @@ def align_icp(
     return {
         "source_mesh_id": source_mesh_id,
         "target_mesh_id": target_mesh_id,
-        "iterations_performed": max_iterations,
-        "final_rms_error": 0.0,
+        # PyMeshLab does not expose the actual iteration count or RMS error.
+        "iterations_performed": None,
+        "final_rms_error": None,
     }
 
 
@@ -171,14 +175,21 @@ def global_align(
     Returns
     -------
     dict
-        ``{"aligned_mesh_ids": list[int], "global_rms_error": float}``
+        ``{"aligned_mesh_ids": list[int], "global_rms_error": None}``
+
+        .. note::
+            PyMeshLab's ``compute_matrix_by_mesh_global_alignment`` applies
+            transforms in-place and returns ``None``, so the global RMS error
+            is not available from the library.
     """
     ms = session.mesh_set
 
     if mesh_ids is None:
         mesh_ids = list(range(ms.mesh_number()))
 
-    result = ms.compute_matrix_by_mesh_global_alignment(
+    # compute_matrix_by_mesh_global_alignment applies transforms in-place
+    # and returns None; global RMS error is not exposed by PyMeshLab.
+    ms.compute_matrix_by_mesh_global_alignment(
         basemesh=mesh_ids[0],
         arcthreshold=arc_threshold,
         samplenum=sample_number,
@@ -186,5 +197,6 @@ def global_align(
 
     return {
         "aligned_mesh_ids": mesh_ids,
-        "global_rms_error": 0.0,
+        # PyMeshLab does not expose the global RMS error.
+        "global_rms_error": None,
     }
